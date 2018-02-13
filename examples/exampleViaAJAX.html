@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>JSON-RPC Tester via Ajax</title>
+		<script src='jsonrpcClient.js'></script>
+		<script>
+			window.addEventListener('load', function () {
+				let btn = document.getElementById('btn');
+				let txt = document.getElementById('txt');
+				try {
+					btn.addEventListener('click', function (e) {
+						let request = JSON.parse(txt.value);
+						let p = jsonrpcClient('../index.php', request.id, request.method, request.params);
+						p.then(function (response) {
+							alert('ALL OK: ' + JSON.stringify(response, undefined, 4));
+						});
+						p.catch(function(response) {
+							alert('OH NO!: ' + JSON.stringify(response, undefined, 4));
+						});
+					});
+				}
+				catch (e) {
+					alert(e);
+				}
+				
+			});
+		</script>
+	</head>
+	<body>
+		<h1>JSON-RPC Tester via Ajax</h1>
+		<p>This tester fires off a JSON-RPC request to the server using 
+		a Javascript Ajax client in the file 'jsonrpc.js'</p>
+		<textarea id=txt cols=50 rows=10>{
+    "id":1,
+    "method":"test",
+    "params":{
+	    "p1":"one",
+	    "p2":"two"
+    }
+}
+		</textarea>
+		<br />
+		<button type=button id=btn>Send!</buttpn>
+	</body>
+</html>
