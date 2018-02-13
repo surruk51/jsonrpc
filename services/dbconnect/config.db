@@ -1,0 +1,7 @@
+{
+	"host":     "127.0.0.1",
+	"database": "ID",
+	"user":     "root",
+	"pass":     "lijiang",
+	"charset":  "utf8mb4"
+}

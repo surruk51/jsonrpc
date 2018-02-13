@@ -1,6 +1,43 @@
 <?php
 namespace getdata;
-
+/***
+ * getdata - method impletation for the getdata message
+ * 
+ * @param object $params The parameters for getdata which are passed as
+ *                       an object. The following properties are
+ *                       recognised
+ *    string  query      EITHER the name of a query in a queries library
+ *                       OR** a string of SQL
+ *    string  querydata  an object with properties matching the 
+ *                       placeholders in the query (whatever its source)
+ *    integer pagelength the number of rows to send in one response.
+ *                       (optional - default infinite)
+ *    integer pageno     the page offset to start at.
+ *                       (optional - default 0)
+ * @returns   object     an object which forms the 'result' property
+ *                       of the server response. contains
+ *    array   resultData each array element represents a retrieved row
+ *                       expressed as an object where the property name
+ *                       is the column name and the value is its value
+ *                       for the current row.
+ *    integer rowsAffected the number of rows retrieved by a SELECT or
+ *                       altered by an UPDATE, INSERT or DELETE
+ * @throws Exception     when an SQL statement is received but not 
+ *                       permitted **
+ * @throws Exception     when a stored SQL statement cannot be found
+ * @throws Exception     when the query definition in the library is 
+ *                       corrupt
+ * @throws PDOException  if any PDO call fails. (e.g. SQL is invalid)
+ * @note                 **RAW SQL, and queries in the query library
+ *                       that are marked as protected can only be run in
+ *                       MaintenanceMode. To invoke MaintenanceMode you
+ *                       must place a file of that name in the server
+ *                       directory.
+ * @version	             0.1.1
+ * @author               Chris Jeffries
+ * @copyright            2018 C G Jeffries
+ * @licence https://www.gnu.org/licenses/gpl-3.0.en.html GPL, version 3
+ ***/
 	function getdata($params) {
 		if(!isset($params->query)) {
 			throw new Exception("No query supplied",30000);

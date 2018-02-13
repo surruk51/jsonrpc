@@ -1,0 +1,8 @@
+"No data supplied in POST 'data' parameter ", 31008
+"No query supplied",30000
+"querydata supplied when none needed", 31045
+"SQL query not permitted, use stored query", 31043
+"Query '{$query}' not found in library", 31040
+"Query not permitted except in maintenance mode", 31041
+json_last_error_message(), json_last_error()+30000
+"SQL query not permitted, use stored query", 31043

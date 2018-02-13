@@ -1,0 +1,20 @@
+JSON_RPC
+    jsonrpcServer.php
+    index.php
+    
+    methods:
+        test:
+            test.php
+			
+	services:
+        (empty)
+	    
+	docs:
+        RPC_JSON.md
+        RPC_JSON.pdf
+
+    examples:
+        exampleViaAJAX.html
+        exampleViaPHP.php
+        jsonrpcClient.js
+        jsonrpcClient.class.php
