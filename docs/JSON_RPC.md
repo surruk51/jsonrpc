@@ -30,7 +30,9 @@ http://www.jsonrpc.org/specification\#overview
 <span id="anchor-1"></span>Set up
 =================================
 
-Copy all the files into a directory that is accessible to the server.
+Copy all the files into a directory that is accessible to the server 
+following the specification in filelayout.txt
+
 The files are as follows:
 
 - exampleViaAJAX.html
@@ -209,15 +211,15 @@ The method or function that receives the call will be passed a PHP
 object containing the parameters passed in the ‘param’ parameter of the
 RPC call, so in the above example, if you wrote
 
-function myFunc(\$params) {\
-if (\$params-&gt;question ==”is this my life?”) { //this would yield
-true\
-\$result = ‘yes it is.’;\
-} else {\
-\$result = ‘what do you mean?’;\
-}\
-return (object) \[“answer”=&gt;\$result\];\
-}
+	function myFunc(\$params) {\
+		if (\$params-&gt;question ==”is this my life?”) { //this would yield
+															true\
+			\$result = ‘yes it is.’;\
+		} else {\
+			\$result = ‘what do you mean?’;\
+		}\
+		return (object) \[“answer”=&gt;\$result\];\
+	}
 
 (note you must return the result as an object, not an array) and called
 it with :
