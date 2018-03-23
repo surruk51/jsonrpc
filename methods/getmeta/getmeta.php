@@ -37,8 +37,11 @@ function getmeta($params) {
 		$getMeta = new DeriveMetaData();
 		$getMeta->setdbh($dbh);
 		$getMeta->setSQL($params->query);
-		return $getMeta->getPHPObject();
+		$retval = new \stdClass();
+		$retval->metaData = $getMeta->getPHPObject();
+		return $retval;
 }
+		
 		
 function getConnection($database)
 {

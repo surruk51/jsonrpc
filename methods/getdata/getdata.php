@@ -40,7 +40,8 @@ namespace getdata;
  ***/
 	function getdata($params) {
 		if(!isset($params->query)) {
-			throw new Exception("No query supplied",30000);
+			$debug = (file_exists('MaintenanceMode'))? json_encode($params): '';
+			throw new \Exception("No query supplied {$debug}",30000);
 		}
 		if(!isset($params->querydata)) {
 			$params->querydata = (object) [];
@@ -57,10 +58,16 @@ namespace getdata;
 		if(!$hasparms && count($data) > 0) {
 			throw new \Exception("querydata supplied when none needed", 31045);
 		}
+		$response = new \stdClass();
+		global $statedata;
+		
+		//This is in case an error occurs
+		if(!isset($statedata)) $statedata = new \stdClass();
+		$statedata->sql = $sql;
+		$statedata->inputdata = $data;
 		
 		$statement = $dbh->prepare($sql);
 		$result = $statement->execute($data);
-		$response = new \stdClass();
 		$response->data = $statement->fetchAll();
 		$response->rowsAffected = $statement->rowCount();
 		return $response;

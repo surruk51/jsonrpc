@@ -28,6 +28,13 @@
 			$suffix = '';
 			$prefix = '';
 		}
+		//catch any current statedata.
+		global $statedata;
+		if(isset($statedata)) {
+			foreach($statedata as $property=>$value) {
+				$retval->error->$property = $value;
+			}
+		}
 		$retval->error->code = $code;
 		$retval->error->message = $prefix . $msg . $suffix;
 		header('Content-type: application/json');

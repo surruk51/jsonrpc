@@ -10,17 +10,21 @@ class DeriveMetaData {
 	private $dbh;
 	private $sql;
 	private $intmeta;
+	private $savedQueryDefinition;
+	public $mergeSaved;
 	
 	function __construct() {
 		$this->intmeta = false;
+		$this->savedQueryDefinition = new \stdClass();
+		$this->mergeSaved = true;
 	}
 	function setdbh($val) { $this->dbh = $val; }
-	function setsql($val) {	$this->sql = getquery($val, $this->dbh); }
+	function setsql($val) {	$this->sql = $this->getquery($val, $this->dbh); }
 	function getjson() { return json_encode($this->analyse(), JSON_PRETTY_PRINT); }
 	function getPHPObject() { return $this->analyse(); }
 	
 	private function analyse() {
-		if ($this->intmeta !== false) {
+		if ($this->intmeta !== false) { //cacheing
 			return $this->intmeta;
 		}
 		else {
@@ -32,6 +36,13 @@ class DeriveMetaData {
 			$tables = $this->getPDOMetaByTable($this->sql); //get the basic data
 			$tables = $this->getMySQLMetaForTables($tables); //get better data if possible
 			$this->intmeta = $this->makeDerivedMetaData($tables);
+			if ($this->mergeSaved) {
+				$this->intmeta = \object_merge($this->intmeta, $this->savedQueryDefinition);
+			}
+			//set defaults for guaranteed components
+			if(!isset($this->intmeta->processes)) $this->intmeta->processes = new \stdClass();
+			if(!isset($this->intmeta->insertProcesses)) $this->intmeta->insertProcesses = new \stdClass();
+			if(!isset($this->intmeta->updateProcesses)) $this->intmeta->updateProcesses = new \stdClass();
 			return $this->intmeta;
 		}
 	}
@@ -401,9 +412,7 @@ class DeriveMetaData {
 		
 		return trim($y);
 	}
-
-}
-
+	
 	function getQuery($query, $dbh, $querytable = 'ID_Queries') {
 	
 		$super = (file_exists('./MaintenanceMode'));
@@ -411,17 +420,49 @@ class DeriveMetaData {
 		if (count(explode(' ', trim($query))) > 1) {
 			if ($super) {
 				return $query;
+				$this->savedQueryDefinition = new \stdClass();
 			} else {
 				throw new \Exception("SQL query not permitted, use stored query", 31043);
 			}
 		} else {
-			$statement = $dbh->prepare("SELECT `queryDefinition`, `protected` FROM `{$querytable}` WHERE `queryName` = :queryName");
+			$statement = $this->dbh->prepare("SELECT `queryDefinition`, `protected` FROM `{$querytable}` WHERE `queryName` = :queryName");
 			$statement->execute(["queryName"=>$query]);
 			$data = $statement->fetch();
-			if($data === false) 					 { throw new \Exception ("Query '{$query}' not found in library", 31040); }
+			if($data === false) { 	//means there is no stored query by this name 
+				//see if we can deduce from the query name		
+				if (in_array($type = substr($query,0,3), ['put','get','del','ins'])) {
+					//we have a valid action. Does it refer to an existing table
+					$statement = $dbh->query('SHOW TABLES');
+					//var_dump($statement);
+					$tablesArr = $statement->fetchAll();
+					foreach($tablesArr as $val) {
+						foreach($val as $key=>$v) {
+							$tables[] = $v;
+							break;
+						}
+					}
+					//var_dump($tables);
+					$mytable = substr($query,6);
+					if(!in_array($mytable, $tables)) {
+						//no, so give up
+						throw new \Exception ("Query '{$query}' not found in library", 31040); 
+					}
+					//now to build a SQL statement to do the analysis with. Our objective
+					//is to collect the metadata so we do a query that will allow us to get that
+					//however it will be ver basic with assumptions about prompt and edittype
+					$sql = "SELECT * FROM `{$mytable}` LIMIT 0";
+					return $sql;
+				}
+				else {
+					throw new \Exception ("Query '{$query}' not found in library", 31040); 
+				}
+			}
 			if($super === false && $data->protected == true) { throw new \Exception ("Query not permitted except in maintenance mode", 31041);}
 			$queryDefinition = json_decode($data->queryDefinition);
-			if (json_last_error() != JSON_ERROR_NONE) {throw new \Exception (json_last_error_message(), json_last_error()+30000);}
+			if (json_last_error() != JSON_ERROR_NONE) {throw new \Exception (json_last_error_msg(), json_last_error()+30000);}
+			$this->savedQueryDefinition = $queryDefinition;
 			return $queryDefinition->query;
 		}
+
 	}
+}
